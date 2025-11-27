@@ -1,0 +1,22 @@
+# HugePages MachineConfigPool for F5 XC Site
+# Based on DEPLOY-4 requirements
+# Creates a dedicated worker pool with HugePages enabled
+
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfigPool
+metadata:
+  name: worker-hp
+  labels:
+    custom-kubelet: hugepages
+spec:
+  machineConfigSelector:
+    matchExpressions:
+      - key: machineconfiguration.openshift.io/role
+        operator: In
+        values:
+          - worker
+          - worker-hp
+  nodeSelector:
+    matchLabels:
+      node-role.kubernetes.io/worker-hp: ""
+  paused: false

@@ -1,0 +1,47 @@
+# F5 Distributed Cloud Site Configuration for OpenShift
+# Based on Section 6.3 and DEPLOY-4 requirements
+# This file configures F5 XC site deployment as pods in OpenShift
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ves-system
+---
+# F5 XC Site Configuration
+# NOTE: This is a template. Replace placeholder values before deployment.
+#
+# Required configuration steps:
+# 1. Obtain site registration token from F5 Distributed Cloud Console
+# 2. Update ClusterName, Latitude, Longitude values
+# 3. Replace <site-registration-token> with actual token
+# 4. Configure HugePages on worker nodes (see hugepages-mcp.yaml)
+# 5. Apply this configuration: oc create -f ce_ocp_gpu-ai.yml
+#
+# For detailed deployment instructions, see docs/f5_xc_deployment.md
+
+# Configuration Parameters (Section 6.3)
+# ClusterName: Unique identifier for this F5 XC site
+# Latitude: Geographic latitude for site location
+# Longitude: Geographic longitude for site location
+# Token: Site registration token from F5 XC Console (keep secure!)
+
+# Example configuration (DO NOT use in production):
+# ClusterName: example-gpu-ai-pod
+# Latitude: 37.7749
+# Longitude: -122.4194
+# Token: <obtain-from-f5-xc-console>
+
+# Security Note (NFR-8, NFR-10):
+# - The site token is a sensitive credential
+# - Store in Kubernetes Secret in production
+# - Never commit actual tokens to version control
+# - Rotate tokens regularly per security policy
+
+# Post-deployment tasks (DEPLOY-5):
+# 1. Approve site registration in F5 XC Console
+# 2. Create Origin Pool for llamastack service
+# 3. Create HTTP Load Balancer
+# 4. Configure WAF policy (SEC-3)
+# 5. Import OpenAPI specification (SEC-4)
+# 6. Enable API Security features (FR-12)
+# 7. Configure rate limiting (FR-13, SEC-5)

@@ -1,0 +1,28 @@
+# HugePages Tuned Profile for F5 XC Site
+# Based on DEPLOY-4 requirements
+# Configures kernel HugePages at boot time
+
+apiVersion: tuned.openshift.io/v1
+kind: Tuned
+metadata:
+  name: hugepages
+  namespace: openshift-cluster-node-tuning-operator
+spec:
+  profile:
+    - name: hugepages-boottime
+      data: |
+        [main]
+        summary=Boot time configuration for HugePages
+        include=openshift-node
+
+        [bootloader]
+        cmdline_openshift_node_hugepages=hugepagesz=2M hugepages=256
+
+        [sysctl]
+        vm.nr_hugepages=256
+
+  recommend:
+    - priority: 20
+      profile: hugepages-boottime
+      match:
+        - label: node-role.kubernetes.io/worker-hp
