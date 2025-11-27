@@ -1,0 +1,120 @@
+# Example values file for F5 API Security Helm chart
+# Copy this file to f5-ai-security-values.yaml and customize
+
+# Frontend application image
+image:
+  repository: quay.io/rh-ai-quickstart/f5-security-ui
+  tag: latest
+  pullPolicy: IfNotPresent
+
+# Number of replicas
+replicaCount: 1
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 8501
+
+# OpenShift Route
+route:
+  enabled: true
+  host: ""  # Leave empty for auto-generated
+  tls:
+    enabled: true
+    termination: edge
+
+# Resource limits (adjust based on your cluster)
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 250m
+    memory: 512Mi
+
+# Autoscaling (optional)
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+
+# Environment variables
+env:
+  # LLaMA Stack endpoint
+  DEFAULT_CHAT_ENDPOINT: "http://llamastack:8321/v1/openai/v1"
+  LLAMA_STACK_ENDPOINT: "http://llamastack:8321"
+
+  # Default model configuration
+  DEFAULT_MODEL: "remote-llm/RedHatAI/Llama-3.2-1B-Instruct-quantized.w8a8"
+
+  # API key (use dummy for testing, real key for production)
+  DEFAULT_API_KEY: "dummy-key"
+
+# Global model configuration
+global:
+  models:
+    # Example: OpenShift AI hosted model
+    rhoai-llama-3-1-8b:
+      id: "redhataillama-31-8b-instruct"
+      url: "https://your-model-endpoint.example.com/v1"
+      apiToken: "your-api-token-here"  # CHANGE THIS
+      enabled: false
+
+    # Example: Local LLM service
+    llama-3-2-3b:
+      id: "meta-llama/Llama-3.2-3B-Instruct"
+      url: "http://llm-service:8000/v1"
+      apiToken: ""
+      enabled: true
+
+# Dependencies (if deploying full stack)
+dependencies:
+  # PGVector database
+  pgvector:
+    enabled: false
+    secret:
+      user: "postgres"
+      password: "CHANGE_ME"  # CHANGE THIS
+      dbname: "rag_blueprint"
+      host: "pgvector"
+      port: 5432
+
+  # LLM service
+  llm-service:
+    enabled: false
+    secret:
+      hf_token: "YOUR_HUGGINGFACE_TOKEN"  # CHANGE THIS
+
+  # LLaMA Stack
+  llama-stack:
+    enabled: false
+    endpoint: "http://llamastack:8321"
+
+# F5 XC Integration
+f5xc:
+  enabled: false
+  # Configure F5 XC separately using ce_ocp_gpu-ai.yml
+
+# Security context
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  capabilities:
+    drop:
+      - ALL
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  fsGroup: 1001
+
+# Node selector (optional - for GPU nodes)
+nodeSelector: {}
+  # node-role.kubernetes.io/worker: ""
+
+# Tolerations (optional)
+tolerations: []
+
+# Affinity (optional)
+affinity: {}
