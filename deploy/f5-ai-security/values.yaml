@@ -1,0 +1,161 @@
+# Default values for f5-ai-security Helm chart
+# This file contains default configuration values
+# Based on Section 6.2 Helm Values Configuration
+
+# Frontend application image configuration
+image:
+  repository: quay.io/rh-ai-quickstart/f5-security-ui
+  tag: latest
+  pullPolicy: IfNotPresent
+
+# Image pull secrets (if using private registry)
+imagePullSecrets: []
+
+# Service configuration (FR-15.2)
+service:
+  type: ClusterIP
+  port: 8501
+  targetPort: 8501
+  annotations: {}
+
+# OpenShift Route configuration (FR-15.1)
+route:
+  enabled: true
+  host: ""  # Leave empty for auto-generated route
+  tls:
+    enabled: true
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  annotations: {}
+
+# Deployment configuration
+replicaCount: 1
+
+# Resource limits and requests (NFR-3)
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 250m
+    memory: 512Mi
+
+# Autoscaling configuration (NFR-5)
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+# Health checks (NFR-14)
+livenessProbe:
+  httpGet:
+    path: /_stcore/health
+    port: 8501
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /_stcore/health
+    port: 8501
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+# Environment variables (Section 6.1)
+env:
+  DEFAULT_CHAT_ENDPOINT: "http://llamastack:8321/v1/openai/v1"
+  DEFAULT_MODEL: "remote-llm/RedHatAI/Llama-3.2-1B-Instruct-quantized.w8a8"
+  DEFAULT_API_KEY: "dummy-key"
+  LLAMA_STACK_ENDPOINT: "http://llamastack:8321"
+
+# Security context (NFR-8)
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  fsGroup: 1001
+  capabilities:
+    drop:
+      - ALL
+
+# Pod security context
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  fsGroup: 1001
+
+# Node selector
+nodeSelector: {}
+
+# Tolerations
+tolerations: []
+
+# Affinity rules
+affinity: {}
+
+# Pod annotations
+podAnnotations: {}
+
+# Service account
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+# Global configuration
+global:
+  # LLM Models configuration (Section 6.2)
+  models:
+    rhoai-llama-3-1-8b:
+      id: "redhataillama-31-8b-instruct"
+      url: "https://model-endpoint.example.com/v1"
+      apiToken: ""  # Should be set via secrets
+      enabled: false
+
+    llama-3-2-3b:
+      id: "meta-llama/Llama-3.2-3B-Instruct"
+      url: "http://llm-service:8000/v1"
+      apiToken: ""
+      enabled: true
+
+# Dependencies configuration
+dependencies:
+  # PGVector database (FR-8)
+  pgvector:
+    enabled: false
+    secret:
+      user: "postgres"
+      password: ""  # Should be set via secrets
+      dbname: "rag_blueprint"
+      host: "pgvector"
+      port: 5432
+
+  # LLM service (FR-7)
+  llm-service:
+    enabled: false
+    secret:
+      hf_token: ""  # Hugging Face token - should be set via secrets
+
+  # LLaMA Stack (FR-6)
+  llama-stack:
+    enabled: false
+    endpoint: "http://llamastack:8321"
+
+# F5 XC Integration (FR-10)
+f5xc:
+  enabled: false
+  # F5 XC configuration is handled separately via ce_ocp_gpu-ai.yml
+  # This is just a placeholder for future integration
+
+# Monitoring and logging (NFR-11)
+monitoring:
+  enabled: false
+  prometheus:
+    enabled: false
+  logging:
+    level: "INFO"

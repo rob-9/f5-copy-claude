@@ -1,0 +1,26 @@
+# Frontend Dependencies for F5 API Security System
+# Based on Technical Requirements Section 4.1
+
+# Streamlit UI Framework
+streamlit>=1.28.0
+
+# LLaMA Stack Client
+llama-stack-client==0.2.22
+
+# OpenAI API Compatibility
+openai>=1.0.0
+
+# HTTP Requests
+requests>=2.31.0
+
+# Data Validation
+pydantic>=2.0.0
+
+# Document Upload Support
+python-multipart>=0.0.6
+
+# YAML Configuration
+pyyaml>=6.0
+
+# Additional utilities
+python-dotenv>=1.0.0

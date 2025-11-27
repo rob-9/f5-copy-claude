@@ -1,0 +1,45 @@
+# Containerfile for F5 API Security UI
+# Based on Section 11 (File Structure) and deployment requirements
+
+FROM python:3.11-slim
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements first for better layer caching
+COPY requirements.txt .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY f5_security_ui/ ./f5_security_ui/
+
+# Create non-root user for security (NFR-8)
+RUN useradd -m -u 1001 streamlit && \
+    chown -R streamlit:streamlit /app
+
+# Switch to non-root user
+USER streamlit
+
+# Expose Streamlit default port
+EXPOSE 8501
+
+# Health check (NFR-14)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python -c "import requests; requests.get('http://localhost:8501/_stcore/health')"
+
+# Set environment variables
+ENV STREAMLIT_SERVER_PORT=8501 \
+    STREAMLIT_SERVER_ADDRESS=0.0.0.0 \
+    STREAMLIT_SERVER_HEADLESS=true \
+    STREAMLIT_BROWSER_GATHER_USAGE_STATS=false
+
+# Run Streamlit application
+CMD ["streamlit", "run", "f5_security_ui/chat.py", "--server.port=8501", "--server.address=0.0.0.0"]
